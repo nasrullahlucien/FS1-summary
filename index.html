@@ -1,0 +1,350 @@
+```html
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>สรุปค่ายและถอดบทเรียน ค่ายต้นกล้าฯ</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Phosphor Icons -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <style>
+        body { font-family: 'Sarabun', 'Inter', sans-serif; background-color: #f3f4f6; }
+        /* Loader */
+        .loader { border: 3px solid #f3f3f3; border-radius: 50%; border-top: 3px solid #16a34a; width: 24px; height: 24px; animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        /* Hide scrollbar for clean look */
+        ::-webkit-scrollbar { display: none; }
+        /* Textarea resize none */
+        textarea { resize: none; }
+        .animation-fade { animation: fadeIn 0.3s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body class="text-gray-800 antialiased flex justify-center">
+
+    <!-- Mobile Container -->
+    <div class="w-full max-w-md bg-gray-50 min-h-screen shadow-2xl relative overflow-x-hidden flex flex-col">
+        
+        <!-- Header -->
+        <header class="bg-[#16a34a] text-white p-4 flex justify-between items-center sticky top-0 z-40 shadow-sm">
+            <div class="flex items-center gap-2 font-semibold text-lg">
+                🌱 สรุปค่าย (AAR)
+            </div>
+            <div class="text-xs bg-white/20 px-3 py-1.5 rounded-full font-medium">
+                Season 1
+            </div>
+        </header>
+
+        <!-- Tab Navigation -->
+        <div class="flex bg-white border-b border-gray-200 sticky top-[60px] z-30">
+            <button id="tabForm" onclick="switchTab('form')" class="flex-1 py-3 text-sm font-bold text-[#16a34a] border-b-2 border-[#16a34a] transition">
+                <i class="ph ph-note-pencil mr-1 text-lg align-middle"></i> บันทึกข้อมูล
+            </button>
+            <button id="tabList" onclick="switchTab('list')" class="flex-1 py-3 text-sm font-medium text-gray-400 border-b-2 border-transparent hover:text-gray-600 transition">
+                <i class="ph ph-books mr-1 text-lg align-middle"></i> ข้อมูลทั้งหมด
+            </button>
+        </div>
+
+        <!-- Main Content -->
+        <div class="flex-1 overflow-y-auto relative">
+            
+            <!-- ============================== -->
+            <!-- TAB 1: FORM (บันทึกข้อมูล AAR) -->
+            <!-- ============================== -->
+            <div id="viewForm" class="p-4 pb-10 block animation-fade">
+                <div class="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm mb-4">
+                    <p class="text-[12px] text-gray-500 mb-4 text-center leading-relaxed">
+                        โปรดสรุปข้อมูลจากการระดมสมองของฝ่ายท่าน เพื่อนำไปเป็นฐานข้อมูลในการพัฒนาค่าย Season 2
+                    </p>
+                    
+                    <form id="aarForm" onsubmit="submitAAR(event)" class="space-y-4">
+                        
+                        <!-- ชื่อ และ ฝ่าย -->
+                        <div class="grid grid-cols-1 gap-4">
+                            <div>
+                                <label class="block text-[13px] font-bold text-gray-700 mb-1">ชื่อ-สกุล (ตัวแทนผู้บันทึก) <span class="text-red-500">*</span></label>
+                                <input type="text" name="recorderName" required class="w-full p-3 rounded-xl border border-gray-200 focus:border-green-500 focus:ring-2 focus:ring-green-100 outline-none text-sm bg-gray-50 transition" placeholder="ระบุชื่อผู้กรอกข้อมูล">
+                            </div>
+                            <div>
+                                <label class="block text-[13px] font-bold text-gray-700 mb-1">ฝ่ายที่รับผิดชอบ <span class="text-red-500">*</span></label>
+                                <select name="department" required class="w-full p-3 rounded-xl border border-gray-200 focus:border-green-500 focus:ring-2 focus:ring-green-100 outline-none text-sm bg-gray-50 transition appearance-none cursor-pointer">
+                                    <option value="" disabled selected>-- เลือกฝ่ายของคุณ --</option>
+                                    <option value="ฝ่ายกิจกรรม">ฝ่ายกิจกรรม</option>
+                                    <option value="ฝ่ายวิชาการและอิบาดะห์">ฝ่ายวิชาการและอิบาดะห์</option>
+                                    <option value="ฝ่ายมุร็อบบี้">ฝ่ายมุร็อบบี้ (พี่เลี้ยง)</option>
+                                    <option value="ฝ่ายครัวและโภชนาการ">ฝ่ายครัวและโภชนาการ</option>
+                                    <option value="ฝ่ายสวัสดิการและบริการ">ฝ่ายสวัสดิการและบริการ</option>
+                                    <option value="ฝ่ายกีฬา">ฝ่ายกีฬา</option>
+                                    <option value="ฝ่าย PR และสื่อ">ฝ่าย PR และสื่อ</option>
+                                    <option value="ฝ่ายเหรัญญิกและจัดหารายได้">ฝ่ายเหรัญญิกและจัดหารายได้</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <hr class="border-gray-100 my-4">
+
+                        <!-- 3 ประเด็นหลัก -->
+                        <div>
+                            <label class="block text-[14px] font-bold text-green-700 mb-1 flex items-center gap-1.5">
+                                <i class="ph ph-star-fill text-yellow-400 text-lg"></i> 1. สิ่งที่ทำได้ดี (Best Practices) <span class="text-red-500">*</span>
+                            </label>
+                            <p class="text-[11px] text-gray-400 mb-2">งานส่วนไหนของฝ่ายเราที่ออกมาราบรื่นและปังกว่าที่คิด? อะไรคือจุดแข็ง?</p>
+                            <textarea name="goodPoints" rows="3" required placeholder="พิมพ์สรุปสิ่งที่ทำได้ดี..." class="w-full p-3 rounded-xl border border-gray-200 focus:border-green-500 focus:ring-2 focus:ring-green-100 outline-none text-sm bg-gray-50 transition"></textarea>
+                        </div>
+
+                        <div>
+                            <label class="block text-[14px] font-bold text-red-600 mb-1 flex items-center gap-1.5">
+                                <i class="ph ph-warning-circle-fill text-lg"></i> 2. ปัญหาและอุปสรรค (Pain Points) <span class="text-red-500">*</span>
+                            </label>
+                            <p class="text-[11px] text-gray-400 mb-2">หน้างานจริงมีอะไรที่ขลุกขลัก ไม่เป็นไปตามแผน? ขาดอะไร? สื่อสารพลาดตรงไหน?</p>
+                            <textarea name="painPoints" rows="3" required placeholder="พิมพ์สรุปปัญหาที่พบ..." class="w-full p-3 rounded-xl border border-gray-200 focus:border-red-400 focus:ring-2 focus:ring-red-100 outline-none text-sm bg-gray-50 transition"></textarea>
+                        </div>
+
+                        <div>
+                            <label class="block text-[14px] font-bold text-blue-600 mb-1 flex items-center gap-1.5">
+                                <i class="ph ph-lightbulb-fill text-yellow-500 text-lg"></i> 3. แนวทางแก้ไข/พัฒนา (Solutions) <span class="text-red-500">*</span>
+                            </label>
+                            <p class="text-[11px] text-gray-400 mb-2">ถ้าจัด Season 2 จะมีวิธีป้องกันหรือแก้ไขปัญหาอย่างไรให้เป็นรูปธรรม?</p>
+                            <textarea name="solutions" rows="3" required placeholder="พิมพ์แนวทางแก้ไขสำหรับปีหน้า..." class="w-full p-3 rounded-xl border border-gray-200 focus:border-blue-400 focus:ring-2 focus:ring-blue-100 outline-none text-sm bg-gray-50 transition"></textarea>
+                        </div>
+
+                        <hr class="border-gray-100 my-4">
+
+                        <!-- Feedback จากที่ปรึกษา -->
+                        <div>
+                            <label class="block text-[14px] font-bold text-gray-700 mb-1 flex items-center gap-1.5">
+                                <i class="ph ph-chats-circle text-lg"></i> 4. คอมเมนต์จากที่ปรึกษา (ถ้ามี)
+                            </label>
+                            <p class="text-[11px] text-gray-400 mb-2">ข้อเสนอแนะที่ได้รับฟังเพิ่มเติมในช่วงนำเสนอหน้าเวที (ถ้าไม่มีเว้นว่างไว้)</p>
+                            <textarea name="feedback" rows="2" placeholder="คอมเมนต์จากที่ปรึกษา หรือข้อเสนอแนะอื่นๆ..." class="w-full p-3 rounded-xl border border-gray-200 focus:border-gray-400 focus:ring-2 focus:ring-gray-100 outline-none text-sm bg-gray-50 transition"></textarea>
+                        </div>
+
+                        <button type="submit" class="w-full bg-[#16a34a] hover:bg-green-700 text-white p-4 rounded-xl font-bold text-sm transition flex items-center justify-center gap-2 shadow-[0_4px_14px_rgba(22,163,74,0.3)] mt-6">
+                            <i class="ph ph-paper-plane-right text-xl"></i> บันทึกและส่งข้อมูล
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- ============================== -->
+            <!-- TAB 2: LIST (ประวัติ AAR) -->
+            <!-- ============================== -->
+            <div id="viewList" class="p-4 pb-10 hidden animation-fade">
+                <!-- Filter -->
+                <div class="mb-4 sticky top-0 z-10 bg-gray-50 pb-2">
+                    <select id="filterDept" onchange="renderAARList()" class="w-full p-3 rounded-xl border border-gray-200 text-sm bg-white shadow-sm font-medium text-gray-700 outline-none cursor-pointer">
+                        <option value="all">แสดงผลทุกฝ่าย</option>
+                        <option value="ฝ่ายกิจกรรม">ฝ่ายกิจกรรม</option>
+                        <option value="ฝ่ายวิชาการและอิบาดะห์">ฝ่ายวิชาการและอิบาดะห์</option>
+                        <option value="ฝ่ายมุร็อบบี้">ฝ่ายมุร็อบบี้ (พี่เลี้ยง)</option>
+                        <option value="ฝ่ายครัวและโภชนาการ">ฝ่ายครัวและโภชนาการ</option>
+                        <option value="ฝ่ายสวัสดิการและบริการ">ฝ่ายสวัสดิการและบริการ</option>
+                        <option value="ฝ่ายกีฬา">ฝ่ายกีฬา</option>
+                        <option value="ฝ่าย PR และสื่อ">ฝ่าย PR และสื่อ</option>
+                        <option value="ฝ่ายเหรัญญิกและจัดหารายได้">ฝ่ายเหรัญญิกและจัดหารายได้</option>
+                    </select>
+                </div>
+
+                <!-- List Container -->
+                <div id="aarListContainer" class="space-y-4">
+                    <!-- Cards injected here via JS -->
+                </div>
+            </div>
+
+        </div> <!-- End Main Content -->
+
+        <!-- Global Loader -->
+        <div id="globalLoader" class="absolute inset-0 bg-white/80 z-[100] hidden flex-col items-center justify-center backdrop-blur-sm transition-opacity">
+            <div class="loader mb-3"></div>
+            <span class="text-sm text-gray-700 font-bold">กำลังบันทึกข้อมูล...</span>
+        </div>
+
+        <!-- Toast Notification -->
+        <div id="toastContainer" class="fixed top-4 left-1/2 transform -translate-x-1/2 z-[100] flex flex-col gap-2 pointer-events-none w-full max-w-[320px] items-center"></div>
+
+    </div>
+
+    <!-- ========================================== -->
+    <!-- ⚙️ JavaScript Logic -->
+    <!-- ========================================== -->
+    <script>
+        // State จำลอง (เก็บข้อมูลชั่วคราวเพื่อให้ Preview ทำงานได้)
+        let aarData = [
+            {
+                id: "mock1",
+                timestamp: new Date().toISOString(),
+                recorderName: "ตัวแทนฝ่ายกิจกรรม",
+                department: "ฝ่ายกิจกรรม",
+                goodPoints: "กิจกรรม Night Ops คุมเวลาได้เป๊ะมาก น้องๆ ปลอดภัยร้อยเปอร์เซ็นต์ กิจกรรมตลาดนัดดุอาอ์สนุก เด็กๆ ชอบและท่องจำได้เยอะมาก",
+                painPoints: "เตรียมฟืนช้าไปหน่อย ทำให้ฐานทำอาหารเองเริ่มเลทไป 10 นาที และตอนชิงธงมืดเกินไปหน่อย",
+                solutions: "ปีหน้าต้องตั้งทีมย่อยสำหรับเตรียมฟืนโดยเฉพาะ และทำตั้งแต่ช่วง 13.00 น. ส่วนชิงธงต้องเพิ่มไฟส่องสว่างจุดซ่อนธง",
+                feedback: "ที่ปรึกษาแนะนำให้เพิ่มกฎเซฟตี้ตอนเดินไปกาโสดให้ชัดเจนกว่านี้ และมีพี่ค่ายประกบหัวท้ายแถว"
+            }
+        ];
+
+        // --- ระบบ Tabs ---
+        function switchTab(tab) {
+            const formTab = document.getElementById('tabForm');
+            const listTab = document.getElementById('tabList');
+            const viewForm = document.getElementById('viewForm');
+            const viewList = document.getElementById('viewList');
+
+            if (tab === 'form') {
+                formTab.className = "flex-1 py-3 text-sm font-bold text-[#16a34a] border-b-2 border-[#16a34a] transition";
+                listTab.className = "flex-1 py-3 text-sm font-medium text-gray-400 border-b-2 border-transparent hover:text-gray-600 transition";
+                viewForm.classList.remove('hidden');
+                viewList.classList.add('hidden');
+            } else {
+                listTab.className = "flex-1 py-3 text-sm font-bold text-[#16a34a] border-b-2 border-[#16a34a] transition";
+                formTab.className = "flex-1 py-3 text-sm font-medium text-gray-400 border-b-2 border-transparent hover:text-gray-600 transition";
+                viewForm.classList.add('hidden');
+                viewList.classList.remove('hidden');
+                renderAARList(); // รีเฟรชข้อมูลเมื่อเปิดแท็บ
+            }
+        }
+
+        // --- บันทึกข้อมูล ---
+        function submitAAR(event) {
+            event.preventDefault();
+            const form = event.target;
+            
+            const newData = {
+                id: Date.now().toString(),
+                timestamp: new Date().toISOString(),
+                recorderName: form.recorderName.value,
+                department: form.department.value,
+                goodPoints: form.goodPoints.value,
+                painPoints: form.painPoints.value,
+                solutions: form.solutions.value,
+                feedback: form.feedback.value || "-"
+            };
+
+            setLoading(true);
+
+            // จำลองการโหลดและบันทึกข้อมูล (Local State สำหรับ Preview)
+            setTimeout(() => {
+                aarData.unshift(newData); // เอาข้อมูลใหม่ไว้บนสุด
+                setLoading(false);
+                showToast("บันทึกบทเรียนสำเร็จ! ขอบคุณครับ", "success");
+                form.reset();
+                switchTab('list'); // เด้งไปหน้าประวัติอัตโนมัติ
+            }, 800);
+        }
+
+        // --- แสดงผลรายการข้อมูล (List) ---
+        function renderAARList() {
+            const container = document.getElementById('aarListContainer');
+            const filter = document.getElementById('filterDept').value;
+            container.innerHTML = '';
+
+            let filteredData = aarData;
+            if (filter !== 'all') {
+                filteredData = aarData.filter(item => item.department === filter);
+            }
+
+            if (filteredData.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-12 flex flex-col items-center">
+                        <i class="ph ph-folder-open text-5xl text-gray-300 mb-3"></i>
+                        <p class="text-sm font-medium text-gray-500">ยังไม่มีการบันทึกข้อมูลของฝ่ายนี้</p>
+                        <p class="text-xs text-gray-400 mt-1">เริ่มกรอกข้อมูลที่เมนู "บันทึกข้อมูล"</p>
+                    </div>`;
+                return;
+            }
+
+            filteredData.forEach(item => {
+                const dateStr = new Date(item.timestamp).toLocaleDateString('th-TH', { 
+                    day: 'numeric', month: 'short', year: '2-digit', hour: '2-digit', minute: '2-digit' 
+                });
+
+                const cardHTML = `
+                    <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden mb-4 hover:shadow-md transition-shadow">
+                        <!-- Card Header -->
+                        <div class="bg-gray-50 px-4 py-3 border-b border-gray-100 flex justify-between items-center">
+                            <div class="font-bold text-gray-800 text-[13px] flex items-center gap-1.5">
+                                <div class="w-7 h-7 rounded-full bg-green-100 text-green-600 flex items-center justify-center shrink-0">
+                                    <i class="ph ph-users-three text-base"></i>
+                                </div>
+                                ${item.department}
+                            </div>
+                            <div class="text-[11px] text-gray-500 bg-white px-2 py-1 rounded border border-gray-200 shadow-sm">
+                                โดย: ${item.recorderName}
+                            </div>
+                        </div>
+                        
+                        <!-- Card Body (3 ประเด็น) -->
+                        <div class="p-4 space-y-4">
+                            <div>
+                                <div class="text-[12px] font-bold text-green-600 mb-1 flex items-center gap-1">
+                                    <i class="ph ph-star-fill text-yellow-400"></i> สิ่งที่ทำได้ดี
+                                </div>
+                                <p class="text-[13px] text-gray-700 bg-green-50/50 p-3 rounded-xl border border-green-100 leading-relaxed">${item.goodPoints}</p>
+                            </div>
+
+                            <div>
+                                <div class="text-[12px] font-bold text-red-500 mb-1 flex items-center gap-1">
+                                    <i class="ph ph-warning-circle-fill"></i> ปัญหา/อุปสรรค
+                                </div>
+                                <p class="text-[13px] text-gray-700 bg-red-50/50 p-3 rounded-xl border border-red-100 leading-relaxed">${item.painPoints}</p>
+                            </div>
+
+                            <div>
+                                <div class="text-[12px] font-bold text-blue-600 mb-1 flex items-center gap-1">
+                                    <i class="ph ph-lightbulb-fill text-yellow-500"></i> แนวทางแก้ไขปีหน้า
+                                </div>
+                                <p class="text-[13px] text-gray-700 bg-blue-50/50 p-3 rounded-xl border border-blue-100 leading-relaxed">${item.solutions}</p>
+                            </div>
+                            
+                            ${item.feedback && item.feedback !== "-" ? `
+                            <div class="mt-3 pt-3 border-t border-gray-100">
+                                <div class="text-[11px] font-bold text-gray-500 mb-1 flex items-center gap-1">
+                                    <i class="ph ph-chat-centered-text"></i> คอมเมนต์ที่ปรึกษา:
+                                </div>
+                                <p class="text-[13px] text-gray-600 italic px-2">"${item.feedback}"</p>
+                            </div>` : ''}
+                        </div>
+                    </div>
+                `;
+                container.innerHTML += cardHTML;
+            });
+        }
+
+        // --- Utils (UI Helpers) ---
+        function setLoading(isLoading) {
+            const loader = document.getElementById('globalLoader');
+            if (isLoading) {
+                loader.classList.remove('hidden');
+                loader.classList.add('flex');
+            } else {
+                loader.classList.add('hidden');
+                loader.classList.remove('flex');
+            }
+        }
+
+        function showToast(msg, type) {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            const bgColor = type === 'success' ? 'bg-[#16a34a]' : 'bg-red-500';
+            const icon = type === 'success' ? 'ph-check-circle' : 'ph-warning-circle';
+            
+            toast.className = `${bgColor} text-white px-5 py-3.5 rounded-2xl shadow-[0_10px_25px_rgba(0,0,0,0.1)] text-sm font-medium flex items-center gap-3 transform transition-all duration-300 translate-y-[-100%] opacity-0 w-auto min-w-[260px] justify-center`;
+            toast.innerHTML = `<i class="ph ${icon} text-2xl"></i> <span>${msg}</span>`;
+            
+            container.appendChild(toast);
+            
+            requestAnimationFrame(() => toast.classList.remove('translate-y-[-100%]', 'opacity-0'));
+            
+            setTimeout(() => {
+                toast.classList.add('translate-y-[-100%]', 'opacity-0');
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        // รันครั้งแรกเมื่อโหลดหน้าเว็บ
+        renderAARList();
+    </script>
+</body>
+</html>
+```
