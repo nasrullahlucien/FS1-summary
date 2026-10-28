@@ -1,10 +1,9 @@
-```html
 <!DOCTYPE html>
 <html lang="th">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>สรุปค่ายและถอดบทเรียน ค่ายต้นกล้าฯ</title>
+    <title>ระบบถอดบทเรียน AAR - ค่ายต้นกล้าฯ</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <!-- Phosphor Icons -->
@@ -170,19 +169,13 @@
     <!-- ⚙️ JavaScript Logic -->
     <!-- ========================================== -->
     <script>
-        // State จำลอง (เก็บข้อมูลชั่วคราวเพื่อให้ Preview ทำงานได้)
-        let aarData = [
-            {
-                id: "mock1",
-                timestamp: new Date().toISOString(),
-                recorderName: "ตัวแทนฝ่ายกิจกรรม",
-                department: "ฝ่ายกิจกรรม",
-                goodPoints: "กิจกรรม Night Ops คุมเวลาได้เป๊ะมาก น้องๆ ปลอดภัยร้อยเปอร์เซ็นต์ กิจกรรมตลาดนัดดุอาอ์สนุก เด็กๆ ชอบและท่องจำได้เยอะมาก",
-                painPoints: "เตรียมฟืนช้าไปหน่อย ทำให้ฐานทำอาหารเองเริ่มเลทไป 10 นาที และตอนชิงธงมืดเกินไปหน่อย",
-                solutions: "ปีหน้าต้องตั้งทีมย่อยสำหรับเตรียมฟืนโดยเฉพาะ และทำตั้งแต่ช่วง 13.00 น. ส่วนชิงธงต้องเพิ่มไฟส่องสว่างจุดซ่อนธง",
-                feedback: "ที่ปรึกษาแนะนำให้เพิ่มกฎเซฟตี้ตอนเดินไปกาโสดให้ชัดเจนกว่านี้ และมีพี่ค่ายประกบหัวท้ายแถว"
-            }
-        ];
+        // ⚠️ นำ Web App URL ที่ Copy มาจาก Google Apps Script มาวางในเครื่องหมายคำพูดด้านล่างนี้
+        const CONFIG = {
+            GAS_URL: "https://script.google.com/macros/s/AKfycbxtJG4EAeo8Bym5ZrhxCReBBctABAsYmFLo1GRQPklohApIIbAZ-chtp1hxb1eAQqtCyg/exec" 
+        };
+
+        // State เก็บข้อมูลของจริง
+        let aarData = [];
 
         // --- ระบบ Tabs ---
         function switchTab(tab) {
@@ -206,7 +199,7 @@
         }
 
         // --- บันทึกข้อมูล ---
-        function submitAAR(event) {
+        async function submitAAR(event) {
             event.preventDefault();
             const form = event.target;
             
@@ -223,14 +216,40 @@
 
             setLoading(true);
 
-            // จำลองการโหลดและบันทึกข้อมูล (Local State สำหรับ Preview)
-            setTimeout(() => {
-                aarData.unshift(newData); // เอาข้อมูลใหม่ไว้บนสุด
-                setLoading(false);
+            try {
+                // ส่งข้อมูลไปที่ Google Apps Script
+                await fetch(CONFIG.GAS_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({ action: 'addAAR', data: newData })
+                });
+                
                 showToast("บันทึกบทเรียนสำเร็จ! ขอบคุณครับ", "success");
                 form.reset();
-                switchTab('list'); // เด้งไปหน้าประวัติอัตโนมัติ
-            }, 800);
+                
+                // ดึงข้อมูลใหม่ล่าสุดกลับมาโชว์ และสลับไปหน้าประวัติ
+                await fetchAARData();
+                switchTab('list');
+            } catch (error) {
+                setLoading(false);
+                showToast("เกิดข้อผิดพลาดในการเชื่อมต่อ", "error");
+            }
+        }
+
+        // --- ดึงข้อมูลจาก Google Sheets ---
+        async function fetchAARData() {
+            setLoading(true);
+            try {
+                const response = await fetch(CONFIG.GAS_URL);
+                const result = await response.json();
+                
+                if (result.status === 'success') {
+                    aarData = result.data;
+                    renderAARList();
+                }
+            } catch (error) {
+                showToast("ไม่สามารถโหลดข้อมูลได้", "error");
+            }
+            setLoading(false);
         }
 
         // --- แสดงผลรายการข้อมูล (List) ---
@@ -342,9 +361,8 @@
             }, 3000);
         }
 
-        // รันครั้งแรกเมื่อโหลดหน้าเว็บ
-        renderAARList();
+        // รันครั้งแรกเมื่อโหลดหน้าเว็บ (ดึงข้อมูลจาก Sheets ทันที)
+        fetchAARData();
     </script>
 </body>
 </html>
-```
