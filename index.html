@@ -142,6 +142,7 @@
                         <option value="ฝ่ายครัวและโภชนาการ">ฝ่ายครัวและโภชนาการ</option>
                         <option value="ฝ่ายสวัสดิการและบริการ">ฝ่ายสวัสดิการและบริการ</option>
                         <option value="ฝ่ายกีฬา">ฝ่ายกีฬา</option>
+                        <option value="ฝ่ายปกครอง">ฝ่ายปกครอง</option>
                         <option value="ฝ่าย PR และสื่อ">ฝ่าย PR และสื่อ</option>
                         <option value="ฝ่ายเหรัญญิกและจัดหารายได้">ฝ่ายเหรัญญิกและจัดหารายได้</option>
                     </select>
@@ -176,12 +177,12 @@
     <!-- ⚙️ JavaScript Logic -->
     <!-- ========================================== -->
     <script>
-        // ⚠️ นำ Web App URL ที่ Copy มาจาก Google Apps Script มาวางในเครื่องหมายคำพูดด้านล่างนี้
+        // URL ของ Google Apps Script ที่เชื่อมต่อฐานข้อมูล
         const CONFIG = {
             GAS_URL: "https://script.google.com/macros/s/AKfycbxtJG4EAeo8Bym5ZrhxCReBBctABAsYmFLo1GRQPklohApIIbAZ-chtp1hxb1eAQqtCyg/exec" 
         };
 
-        // State เก็บข้อมูลของจริง
+        // State เก็บข้อมูล
         let aarData = [];
 
         // --- ระบบ Tabs ---
@@ -201,7 +202,7 @@
                 formTab.className = "flex-1 py-3 text-sm font-medium text-gray-400 border-b-2 border-transparent hover:text-gray-600 transition";
                 viewForm.classList.add('hidden');
                 viewList.classList.remove('hidden');
-                renderAARList(); // รีเฟรชข้อมูลเมื่อเปิดแท็บ
+                renderAARList(); 
             }
         }
 
@@ -224,7 +225,6 @@
             setLoading(true);
 
             try {
-                // ส่งข้อมูลไปที่ Google Apps Script
                 await fetch(CONFIG.GAS_URL, {
                     method: 'POST',
                     body: JSON.stringify({ action: 'addAAR', data: newData })
@@ -233,7 +233,6 @@
                 showToast("บันทึกบทเรียนสำเร็จ! ขอบคุณครับ", "success");
                 form.reset();
                 
-                // ดึงข้อมูลใหม่ล่าสุดกลับมาโชว์ และสลับไปหน้าประวัติ
                 await fetchAARData();
                 switchTab('list');
             } catch (error) {
@@ -274,8 +273,7 @@
                 container.innerHTML = `
                     <div class="text-center py-12 flex flex-col items-center">
                         <i class="ph ph-folder-open text-5xl text-gray-300 mb-3"></i>
-                        <p class="text-sm font-medium text-gray-500">ยังไม่มีการบันทึกข้อมูลของฝ่ายนี้</p>
-                        <p class="text-xs text-gray-400 mt-1">เริ่มกรอกข้อมูลที่เมนู "บันทึกข้อมูล"</p>
+                        <p class="text-sm font-medium text-gray-500">ยังไม่มีการบันทึกข้อมูล</p>
                     </div>`;
                 return;
             }
@@ -285,56 +283,99 @@
                     day: 'numeric', month: 'short', year: '2-digit', hour: '2-digit', minute: '2-digit' 
                 });
 
+                // สร้าง HTML กล่องคอมเมนต์แบบไม่ระบุชื่อ
+                let commentsHTML = '';
+                if(item.comments && item.comments.length > 0) {
+                    commentsHTML = item.comments.map(c => `
+                        <div class="bg-gray-100 rounded-xl p-3 mb-2 text-[12px] text-gray-700 relative">
+                            <span class="font-bold text-gray-500 text-[10px] block mb-0.5">เพื่อนทีมงาน:</span>
+                            ${c}
+                        </div>
+                    `).join('');
+                }
+
+                let feedbackHTML = '';
+                if(item.feedback && item.feedback !== "-") {
+                    feedbackHTML = `
+                    <div class="mt-3 pt-3 border-t border-gray-100">
+                        <div class="text-[11px] font-bold text-gray-500 mb-1 flex items-center gap-1">
+                            <i class="ph ph-chat-centered-text"></i> คอมเมนต์ที่ปรึกษา:
+                        </div>
+                        <p class="text-[13px] text-gray-600 italic px-2">"${item.feedback}"</p>
+                    </div>`;
+                }
+
                 const cardHTML = `
                     <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden mb-4 hover:shadow-md transition-shadow">
-                        <!-- Card Header -->
-                        <div class="bg-gray-50 px-4 py-3 border-b border-gray-100 flex justify-between items-center">
-                            <div class="font-bold text-gray-800 text-[13px] flex items-center gap-1.5">
+                        
+                        <div class="bg-gray-50 px-4 py-3 border-b border-gray-100 flex justify-between items-start">
+                            <div class="font-bold text-gray-800 text-[13px] flex items-center gap-1.5 mt-1">
                                 <div class="w-7 h-7 rounded-full bg-green-100 text-green-600 flex items-center justify-center shrink-0">
                                     <i class="ph ph-users-three text-base"></i>
                                 </div>
                                 ${item.department}
                             </div>
-                            <div class="text-[11px] text-gray-500 bg-white px-2 py-1 rounded border border-gray-200 shadow-sm">
-                                โดย: ${item.recorderName}
+                            <div class="text-[11px] text-gray-500 bg-white px-2 py-1.5 rounded-lg border border-gray-200 shadow-sm text-right">
+                                <div class="font-bold text-[#16a34a]">บันทึกโดย: ${item.recorderName}</div>
+                                <div class="text-[9px] text-gray-400 mt-0.5 flex items-center justify-end gap-1"><i class="ph ph-clock"></i> ${dateStr}</div>
                             </div>
                         </div>
                         
-                        <!-- Card Body (3 ประเด็น) -->
                         <div class="p-4 space-y-4">
                             <div>
-                                <div class="text-[12px] font-bold text-green-600 mb-1 flex items-center gap-1">
-                                    <i class="ph ph-star-fill text-yellow-400"></i> สิ่งที่ทำได้ดี
-                                </div>
+                                <div class="text-[12px] font-bold text-green-600 mb-1 flex items-center gap-1"><i class="ph ph-star-fill text-yellow-400"></i> สิ่งที่ทำได้ดี</div>
                                 <p class="text-[13px] text-gray-700 bg-green-50/50 p-3 rounded-xl border border-green-100 leading-relaxed">${item.goodPoints}</p>
                             </div>
-
                             <div>
-                                <div class="text-[12px] font-bold text-red-500 mb-1 flex items-center gap-1">
-                                    <i class="ph ph-warning-circle-fill"></i> ปัญหา/อุปสรรค
-                                </div>
+                                <div class="text-[12px] font-bold text-red-500 mb-1 flex items-center gap-1"><i class="ph ph-warning-circle-fill"></i> ปัญหา/อุปสรรค</div>
                                 <p class="text-[13px] text-gray-700 bg-red-50/50 p-3 rounded-xl border border-red-100 leading-relaxed">${item.painPoints}</p>
                             </div>
-
                             <div>
-                                <div class="text-[12px] font-bold text-blue-600 mb-1 flex items-center gap-1">
-                                    <i class="ph ph-lightbulb-fill text-yellow-500"></i> แนวทางแก้ไขปีหน้า
-                                </div>
+                                <div class="text-[12px] font-bold text-blue-600 mb-1 flex items-center gap-1"><i class="ph ph-lightbulb-fill text-yellow-500"></i> แนวทางแก้ไขปีหน้า</div>
                                 <p class="text-[13px] text-gray-700 bg-blue-50/50 p-3 rounded-xl border border-blue-100 leading-relaxed">${item.solutions}</p>
                             </div>
                             
-                            ${item.feedback && item.feedback !== "-" ? `
-                            <div class="mt-3 pt-3 border-t border-gray-100">
-                                <div class="text-[11px] font-bold text-gray-500 mb-1 flex items-center gap-1">
-                                    <i class="ph ph-chat-centered-text"></i> คอมเมนต์ที่ปรึกษา:
+                            ${feedbackHTML}
+
+                            <div class="mt-4 pt-4 border-t-2 border-dashed border-gray-100">
+                                <div class="text-[12px] font-bold text-gray-600 mb-3 flex items-center gap-1.5">
+                                    <i class="ph ph-chats text-lg"></i> ความคิดเห็นจากเพื่อนทีมงาน
                                 </div>
-                                <p class="text-[13px] text-gray-600 italic px-2">"${item.feedback}"</p>
-                            </div>` : ''}
+                                ${commentsHTML}
+                                <div class="flex gap-2 mt-2">
+                                    <input type="text" id="commentInput_${item.id}" placeholder="พิมพ์เสนอแนะเพิ่มเติม..." class="flex-1 p-2.5 rounded-xl border border-gray-200 text-xs outline-none focus:border-green-500 focus:ring-2 focus:ring-green-100 bg-gray-50 transition">
+                                    <button onclick="submitComment('${item.id}')" class="bg-gray-800 text-white px-4 py-2.5 rounded-xl text-xs font-bold hover:bg-gray-900 transition flex items-center gap-1 shadow-sm">
+                                        <i class="ph ph-paper-plane-right text-sm"></i> ส่ง
+                                    </button>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 `;
                 container.innerHTML += cardHTML;
             });
+        }
+
+        // --- ส่งคอมเมนต์ (Anonymous) ---
+        async function submitComment(aarId) {
+            const inputEl = document.getElementById(`commentInput_${aarId}`);
+            const commentText = inputEl.value.trim();
+            
+            if (!commentText) return showToast("กรุณาพิมพ์ข้อความก่อนส่ง", "error");
+
+            setLoading(true);
+            try {
+                await fetch(CONFIG.GAS_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({ action: 'addComment', aarId: aarId, commentText: commentText })
+                });
+                
+                showToast("ส่งความคิดเห็นสำเร็จ", "success");
+                await fetchAARData(); 
+            } catch (error) {
+                setLoading(false);
+                showToast("เกิดข้อผิดพลาดในการส่ง", "error");
+            }
         }
 
         // --- Utils (UI Helpers) ---
@@ -368,7 +409,7 @@
             }, 3000);
         }
 
-        // รันครั้งแรกเมื่อโหลดหน้าเว็บ (ดึงข้อมูลจาก Sheets ทันที)
+        // โหลดข้อมูลเมื่อเปิดหน้าเว็บ
         fetchAARData();
     </script>
 </body>
